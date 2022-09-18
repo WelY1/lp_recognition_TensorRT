@@ -4,7 +4,7 @@
 
 简介：利用[deep-text-recognition-benchmark](https://github.com/clovaai/deep-text-recognition-benchmark)做的一个车牌检测的demo，并且部署到onnx和tensorrt并进行推理。目前只做了**None-VGG-BiLSTM-CTC**这个模型的转换（推理速度快、模型小、准确率不低），后续会看情况更新其他模型。
 
-Requirement：见[deep-text-recognition-benchmark](https://github.com/clovaai/deep-text-recognition-benchmark)，此外还需要onnx，tensorrt-7或8。
+Requirement：见[deep-text-recognition-benchmark](https://github.com/clovaai/deep-text-recognition-benchmark)，此外还需要onnx，onnxruntime，tensorrt-7或8。
 
 train：依照[deep-text-recognition-benchmark](https://github.com/clovaai/deep-text-recognition-benchmark)提供的train.py进行训练，需要将多GPU训练改为单GPU训练，见模型修改（1）。
 
@@ -48,7 +48,7 @@ CCPD2019(4988)+CCPD2020(5769)+CLPD(1200)，共计11957张，训练集：验证�
 在RTX 3080上的推理速度（pytorch）：
 |模型|单张推理速度/ms|文件权重大小/MB|精度/%|
 |:------------------|:--|:---|:---|
-|None-VGG-BiLSTM-CTC|2～3|33.9|92.6|
+|None-VGG-BiLSTM-CTC|2~3|33.9|92.6|
 |None-Resnet-BiLSTM-CTC|5~6|188.9|94.7|
 |TPS-Resnet-BiLSTM-Attn|8~9|33.9|97.5|
 
@@ -93,6 +93,26 @@ cd <TensorRT root directory>/bin
 推理过程需要构建engine、context等等，这里借鉴*<TensorRT>/samples/python/efficientnet/infer.py*的写法，具体过程见***infer_trt.py***。
 
 到此完成整个模型的转换及推理，纪念一下～
+
+## Prediction Result 
+    
+GPU：RTX 3080
+|pytorch|onnx|tensorrt|
+|:-----------------|:-----------------|:----------------|
+|皖DD00507 (0.9733)|皖DD00507 (0.9850)|皖DD00507 (0.9850)|
+|皖AD10010 (0.7866)|皖AD10010 (0.9968)|皖AD10010 (0.9969)|
+|皖AD86986 (0.6913)|皖AD86986 (0.9804)|皖AD86986 (0.9798)|
+|皖BD03960 (0.9078)|皖BD03960 (0.9549)|皖BD03960 (0.9564)|
+|皖AD04248 (0.9715)|皖AD04248 (0.9995)|皖AD04248 (0.9995)|
+|皖AD09533 (0.9765)|皖AD09533 (0.9806)|皖AD09533 (0.9803)|
+|皖AD35169 (0.6677)|皖AD35169 (0.8164)|皖AD35169 (0.8199)|
+|皖AD18268 (0.7823)|皖AD18268 (0.9242)|皖AD18268 (0.9249)|
+|皖AD12777 (0.5309)|皖AD12777 (0.7267)|皖AD12777 (0.7298)|
+|皖AD19889 (0.9881)|皖AD19889 (0.9966)|皖AD19889 (0.9967)|
+|皖AD04219 (0.9624)|皖AD04219 (0.9693)|皖AD04219 (0.9693)|
+|皖AD02557 (0.7737)|皖AD02557 (0.8962)|皖AD02557 (0.8924)|
+|1.37ms|2.69ms|0.95ms|
+以上推理时间仅为网络的推理时间，不包括前处理及后处理。
 
 ## Reference
 ```
