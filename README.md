@@ -4,7 +4,13 @@
 
 简介：利用[deep-text-recognition-benchmark](https://github.com/clovaai/deep-text-recognition-benchmark)做的一个车牌检测的demo，并且部署到onnx和tensorrt并进行推理。目前只做了**None-VGG-BiLSTM-CTC**这个模型的转换（推理速度快、模型小、准确率不低），后续会看情况更新其他模型。
 
-## 对原模型的修改：
+Requirement：见[deep-text-recognition-benchmark](https://github.com/clovaai/deep-text-recognition-benchmark)，此外还需要onnx，tensorrt-7或8。
+
+train：依照[deep-text-recognition-benchmark](https://github.com/clovaai/deep-text-recognition-benchmark)提供的train.py进行训练，需要将多GPU训练改为单GPU训练，见模型修改（1）。
+
+pytorch -> onnx -> tensorrt 部署及推理见模型修改（2）（3）。
+
+## 模型修改：
 
 （1）因为onnx只支持单GPU部署，原模型是用多GPU训练及推理，所以对这里进行了修改：
 ```
@@ -39,7 +45,7 @@ visual_feature = avgpool2d(visual_feature.permute(0, 3, 1, 2))
 
 CCPD2019(4988)+CCPD2020(5769)+CLPD(1200)，共计11957张，训练集：验证集≈8：2。
 
-在RTX 3080上的推理速度：
+在RTX 3080上的推理速度（pytorch）：
 |模型|单张推理速度/ms|文件权重大小/MB|精度/%|
 |:------------------|:--|:---|:---|
 |None-VGG-BiLSTM-CTC|2～3|33.9|92.6|
@@ -82,13 +88,22 @@ make
 cd <TensorRT root directory>/bin
 ./trtexec --onnx=model.onnx --workspace=1024 --fp16 
 ```
+注意：tensorrt需要根据不同的GPU进行针对性地优化部署，因此这里提供的.engine文件在你的电脑上大概率用不了，建议按照上面的方式自行转换。
+
 推理过程需要构建engine、context等等，这里借鉴*<TensorRT>/samples/python/efficientnet/infer.py*的写法，具体过程见***infer_trt.py***。
 
 到此完成整个模型的转换及推理，纪念一下～
 
-
-
-
-
-
-
+## Reference
+```
+@inproceedings{baek2019STRcomparisons,
+  title={What Is Wrong With Scene Text Recognition Model Comparisons? Dataset and Model Analysis},
+  author={Baek, Jeonghun and Kim, Geewook and Lee, Junyeop and Park, Sungrae and Han, Dongyoon and Yun, Sangdoo and Oh, Seong Joon and Lee, Hwalsuk},
+  booktitle = {International Conference on Computer Vision (ICCV)},
+  year={2019},
+  pubstate={published},
+  tppubtype={inproceedings}
+}
+```
+## License
+> Apache License, Version 2.0
