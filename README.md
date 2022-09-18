@@ -1,6 +1,6 @@
 # lp_recognition_TensorRT
 
-## 简介
+## 1、简介
 
 简介：利用[deep-text-recognition-benchmark](https://github.com/clovaai/deep-text-recognition-benchmark)做的一个车牌检测的demo，并且部署到onnx和tensorrt并进行推理。目前只做了**None-VGG-BiLSTM-CTC**这个模型的转换（推理速度快、模型小、准确率不低），后续会看情况更新其他模型。
 
@@ -8,9 +8,9 @@ Requirement：见[deep-text-recognition-benchmark](https://github.com/clovaai/de
 
 train：依照[deep-text-recognition-benchmark](https://github.com/clovaai/deep-text-recognition-benchmark)提供的train.py进行训练，需要将多GPU训练改为单GPU训练，见模型修改（1）。
 
-pytorch -> onnx -> tensorrt 部署及推理见模型修改（2）（3）。
+pytorch -> onnx -> tensorrt 部署及推理见4、5。
 
-## 模型修改：
+## 2、模型修改：
 
 （1）因为onnx只支持单GPU部署，原模型是用多GPU训练及推理，所以对这里进行了修改：
 ```
@@ -41,7 +41,7 @@ visual_feature = avgpool2d(visual_feature.permute(0, 3, 1, 2))
 
 （3）其他模型的改动主要是针对单一**None-VGG-BiLSTM-CTC**模型，将其他用不到的参数进行删减，这些都无伤大雅。
 
-## 数据集
+## 3、数据集
 
 CCPD2019(4988)+CCPD2020(5769)+CLPD(1200)，共计11957张，训练集：验证集≈8：2。
 
@@ -52,7 +52,7 @@ CCPD2019(4988)+CCPD2020(5769)+CLPD(1200)，共计11957张，训练集：验证�
 |None-Resnet-BiLSTM-CTC|5~6|188.9|94.7|
 |TPS-Resnet-BiLSTM-Attn|8~9|33.9|97.5|
 
-## pytorch -> onnx
+## 4、pytorch -> onnx
 
 利用pytorch自带工具**torch.onnx.export**转换，在***infer_pth.py***中可以实现pytorch模型推理和->onnx的转化.
 ```
@@ -74,7 +74,7 @@ def torch2onnx(model, onnx_path):
 ```
 onnx的推理在***infer_onnx.py***，onnx模型的导入与加载几乎与pytorch一样。
 
-## onnx -> tensorrt
+## 5、onnx -> tensorrt
 
 利用tensorrt自带工具**trtexec**，或者[onnx-tensorrt](https://github.com/onnx/onnx-tensorrt)均可完成。方便起见，这里使用**trtexec**。
 
@@ -94,7 +94,7 @@ cd <TensorRT root directory>/bin
 
 到此完成整个模型的转换及推理，纪念一下～
 
-## Prediction Result 
+## 6、Prediction Result 
     
 GPU：RTX 3080
 |pytorch|onnx|tensorrt|
@@ -115,7 +115,7 @@ GPU：RTX 3080
     
 以上推理时间仅为网络的推理时间，不包括前处理及后处理。
 
-## Reference
+## 7、Reference
 ```
 @inproceedings{baek2019STRcomparisons,
   title={What Is Wrong With Scene Text Recognition Model Comparisons? Dataset and Model Analysis},
@@ -126,5 +126,5 @@ GPU：RTX 3080
   tppubtype={inproceedings}
 }
 ```
-## License
+## 8、License
 > Apache License, Version 2.0
