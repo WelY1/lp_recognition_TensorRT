@@ -21,25 +21,25 @@ self.net = torch.nn.DataParallel(self.net).to(self.device)
 self.net = self.net.to(self.device)
 ```
 
-（2）onnx不支持池化的动态参数，将**model**中的**\_\_init\_\_**部分的
+（2）onnx不支持池化的 **动态参数**，将**Model**中的 `\_\_init\_\_`部分的
 ```
 self.AdaptiveAvgPool = nn.AdaptiveAvgPool2d((None, 1))
 ```
-注释掉，将**forward**部分的
+注释掉，将`forward`部分的
 ```
 visual_feature = self.AdaptiveAvgPool(visual_feature.permute(0, 3, 1, 2))
 ```
 改为
 ```
-b, c, h, w = visual_feature.size()
-if torch.is_tensor(c):
-    c = c.item() 
-avgpool2d = nn.AdaptiveAvgPool2d((c, 1))
-visual_feature = avgpool2d(visual_feature.permute(0, 3, 1, 2))
+avgpool2d = nn.AdaptiveAvgPool2d((1,w))
+visual_feature = avgpool2d(visual_feature).permute(0,3,1,2)
 ```
-作者的目的是通过2d均值池化将h的维度变为1，作者先将[b, c, h, w]->[b, w, c, h]，所以这里保留的是c通道不变。
+作者的目的是通过**自适应池化** 将特征图的h维度变为1，保持w维度不变，
+再将[b, c, h, w]->[b, w, c, h]，
+最后将h维度压缩，->[b, w, c]。
+其中w维度作为后面序列建模的长度
 
-（3）其他模型的改动主要是针对单一**None-VGG-BiLSTM-CTC**模型，将其他用不到的参数进行删减，这些都无伤大雅。
+（3）其他模型的改动主要是针对单一`None-VGG-BiLSTM-CTC`模型，将其他用不到的参数进行删减，这些都无伤大雅。
 
 ## 3、数据集
 
@@ -54,7 +54,7 @@ CCPD2019(4988)+CCPD2020(5769)+CLPD(1200)，共计11957张，训练集：验证�
 
 ## 4、pytorch -> onnx
 
-利用pytorch自带工具**torch.onnx.export**转换，在***infer_pth.py***中可以实现pytorch模型推理和->onnx的转化.
+利用pytorch自带工具`torch.onnx.export`转换，在`infer_pth.py`中可以实现pytorch模型推理和->onnx的转化.
 ```
 def torch2onnx(model, onnx_path):
         model.eval()
@@ -72,11 +72,11 @@ def torch2onnx(model, onnx_path):
             opset_version=11 
         )
 ```
-onnx的推理在***infer_onnx.py***，onnx模型的导入与加载几乎与pytorch一样。
+onnx的推理在`infer_onnx.py`，onnx模型的导入与加载几乎与pytorch一样。
 
 ## 5、onnx -> tensorrt
 
-利用tensorrt自带工具**trtexec**，或者[onnx-tensorrt](https://github.com/onnx/onnx-tensorrt)均可完成。方便起见，这里使用**trtexec**。
+利用tensorrt自带工具`trtexec`，或者[onnx-tensorrt](https://github.com/onnx/onnx-tensorrt)均可完成。方便起见，这里使用`trtexec`。
 
 首先完成编译：
 ```

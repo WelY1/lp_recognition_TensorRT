@@ -63,13 +63,16 @@ class Model(nn.Module):
         """ Feature extraction stage """
         visual_feature = self.FeatureExtraction(input)     # [1, 512, 1, 24]
         b, c, h, w = visual_feature.size()
-        if torch.is_tensor(c):
-        	c = c.item() 
-        avgpool2d = nn.AdaptiveAvgPool2d((c, 1))
-        visual_feature = avgpool2d(visual_feature.permute(0, 3, 1, 2))  
-        # visual_feature = self.AdaptiveAvgPool(visual_feature.permute(0, 3, 1, 2))  
+
+        avgpool2d = nn.AdaptiveAvgPool2d((1,w))
+        visual_feature = avgpool2d(visual_feature).permute(0,3,1,2)
         # [b, c, h, w] -> [b, w, c, h]  [1, 24, 512, 1]
         
+        # avgpool2d = nn.AdaptiveAvgPool2d((c, 1))
+        # visual_feature = avgpool2d(visual_feature.permute(0, 3, 1, 2)) 
+        
+        # visual_feature = self.AdaptiveAvgPool(visual_feature.permute(0, 3, 1, 2))  
+
         visual_feature = visual_feature.squeeze(3)     # [1, 24, 512]
 
         """ Sequence modeling stage """
