@@ -21,7 +21,7 @@ self.net = torch.nn.DataParallel(self.net).to(self.device)
 self.net = self.net.to(self.device)
 ```
 
-（2）onnx不支持池化的 **动态参数**，将**Model**中的 `\_\_init\_\_`部分的
+（2）onnx不支持池化的 **动态参数**，将**Model**中的 `__init__`部分的
 ```
 self.AdaptiveAvgPool = nn.AdaptiveAvgPool2d((None, 1))
 ```
