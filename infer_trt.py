@@ -192,7 +192,9 @@ class TensorRTInfer:
         # Process I/O and execute the network
         batch = self.AlignCollate_demo(batch)    # preprocess
         cuda.memcpy_htod(self.inputs[0]["allocation"], np.ascontiguousarray(batch))
+        start = time.time()
         self.context.execute_v2(self.allocations)
+        time1 = time.time() - start
         cuda.memcpy_dtoh(output, self.outputs[0]["allocation"])
 
         # Process the results
@@ -211,7 +213,7 @@ class TensorRTInfer:
             confidence_score = pred_max_prob.cumprod(dim=0)[-1]
         
 
-        return pred, confidence_score
+        return pred, confidence_score, time1
     
 def warmup():
     # warmup
@@ -220,19 +222,22 @@ def warmup():
         file_name = "demo_image/" + str(i+1) + ".jpg"
         im = cv2.imread(file_name)
         img.append(im)
-        lp, conf =recognition.infer(img)
+        lp, conf, time =recognition.infer(img)
 
 def test():
+    avg = 0
     start = time.time()   
     for i in range(12):
         img = []
         file_name = "demo_image/" + str(i+1) + ".jpg"
         im = cv2.imread(file_name)
         img.append(im)
-        start1 = time.time()
-        lp, conf =recognition.infer(img)
-        print(lp, conf,time.time()-start1)
-    print((time.time()-start)/12)
+        # start1 = time.time()
+        lp, conf, time1 =recognition.infer(img)
+        avg = time1 if avg==0 else avg*0.95+time1*0.05
+        # print(lp, conf,time.time()-start1)
+    print(avg*1000)
+    # print((time.time()-start)/12)
 
 if __name__ == '__main__':
     recognition = TensorRTInfer()
