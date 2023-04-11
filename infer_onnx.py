@@ -27,7 +27,7 @@ class CTCLabelConverter(object):
             self.dict[char] = i + 1
 
         self.character = ['[CTCblank]'] + dict_character  # dummy '[CTCblank]' token for CTCLoss (index 0)
-
+    '''
     def encode(self, text, batch_max_length=25, device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')):
         """convert text-label into text-index.
         input:
@@ -47,7 +47,7 @@ class CTCLabelConverter(object):
             text = [self.dict[char] for char in text]
             batch_text[i][:len(text)] = torch.LongTensor(text)
         return (batch_text.to(device), torch.IntTensor(length).to(device))
-
+    '''
     def decode(self, text_index, length):
         """ convert text-index into text-label. """
         texts = []
