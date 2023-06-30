@@ -90,7 +90,7 @@ cd <TensorRT root directory>/bin
 ```
 注意：tensorrt需要根据不同的GPU进行针对性地优化部署，因此这里提供的.engine文件在你的电脑上大概率用不了，建议按照上面的方式自行转换。
 
-推理过程需要构建engine、context等等，这里借鉴*<TensorRT>/samples/python/efficientnet/infer.py*的写法，具体过程见***infer_trt.py***。
+推理过程需要构建engine、context等等，这里借`<TensorRT>/samples/python/efficientnet/infer.py`的写法，具体过程见`infer_trt.py`。
 
 到此完成整个模型的转换及推理，纪念一下～
 
