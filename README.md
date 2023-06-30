@@ -20,8 +20,9 @@ self.net = torch.nn.DataParallel(self.net).to(self.device)
 ```
 self.net = self.net.to(self.device)
 ```
+修改之后要重新训练
 
-（2）onnx不支持池化的 **动态参数**，将**Model**中的 `__init__`部分的
+（2）onnx不支持池化的 **动态参数**，将`Model`中的 `__init__`部分的
 ```
 self.AdaptiveAvgPool = nn.AdaptiveAvgPool2d((None, 1))
 ```
@@ -76,21 +77,21 @@ onnx的推理在`infer_onnx.py`，onnx模型的导入与加载几乎与pytorch�
 
 ## 5、onnx -> tensorrt
 
-利用tensorrt自带工具`trtexec`，或者[onnx-tensorrt](https://github.com/onnx/onnx-tensorrt)均可完成。方便起见，这里使用`trtexec`。
+利用tensorrt自带工具`trtexec`，或者[onnx-tensorrt](https://github.com/onnx/onnx-tensorrt)均可完成。方便起见，这里使用`trtexec`命令行。
 
 首先完成编译：
-```
+```shell
 cd <TensorRT root directory>/samples/trtexec
 make
 ```
-简单起见，完成fp16精度的转换，（因为使用的时候batch为1，所以这里暂时没有设置成动态形状）：
+简单起见，完成fp16精度的转换，（因为实际推理的时候batch为1，所以这里暂时没有设置成动态形状）：
 ```
 cd <TensorRT root directory>/bin
 ./trtexec --onnx=model.onnx --workspace=1024 --fp16 
 ```
-注意：tensorrt需要根据不同的GPU进行针对性地优化部署，因此这里提供的.engine文件在你的电脑上大概率用不了，建议按照上面的方式自行转换。
+注意：tensorrt需要根据不同的GPU进行针对性地优化部署，因此这里提供的.engine文件在其他电脑上大概率用不了，建议按照上面的方式自行转换。
 
-推理过程需要构建engine、context等等，这里借`<TensorRT>/samples/python/efficientnet/infer.py`的写法，具体过程见`infer_trt.py`。
+推理过程需要构建engine、context等等，这里借鉴`<TensorRT>/samples/python/efficientnet/infer.py`的写法，具体代码见`infer_trt.py`。
 
 到此完成整个模型的转换及推理，纪念一下～
 
